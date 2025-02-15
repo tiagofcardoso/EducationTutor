@@ -1,3 +1,5 @@
 *.wav
 .tutor
 node_modules
+audio_processing/__pycache__/
+text_to_speech_integration/__pycache__/
