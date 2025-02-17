@@ -1,10 +1,24 @@
 let avatarIdleAnimation, avatarSpeakingAnimation;
 let isSpeaking = false;  // controle se TTS está em reprodução
+let currentModel = 'ollama'; // default model
 
 document.addEventListener("DOMContentLoaded", function () {
     // Carrega o avatar em modo idle
     loadAvatarIdle();
+
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 });
+
+function selectModel(model) {
+    currentModel = model;
+    document.getElementById('ollama-btn').classList.toggle('bg-blue-700', model === 'ollama');
+    document.getElementById('openai-btn').classList.toggle('bg-purple-700', model === 'openai');
+}
 
 // Carrega a animação idle
 function loadAvatarIdle() {
@@ -48,25 +62,21 @@ function sendMessage() {
         addMessage("Você: " + message, "user");
         input.value = "";
 
-        // Aqui você faz a lógica de envio da mensagem ao servidor
-        // Exemplo fictício com fetch POST
-        fetch("/send_message", {
+        fetch(`/chat/${currentModel}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ message: message })
         })
-            .then(response => response.json())
-            .then(data => {
-                addMessage("Bot: " + data.response, "bot");
-
-                // Toca o áudio da resposta se disponível
-                if (data.audio_url) {
-                    playAudioFeedback(data.audio_url);
-                }
-            })
-            .catch(err => console.error(err));
+        .then(response => response.json())
+        .then(data => {
+            addMessage("Bot: " + data.response, "bot");
+            if (data.audio_url) {
+                playAudioFeedback(data.audio_url);
+            }
+        })
+        .catch(err => console.error(err));
     }
 }
 

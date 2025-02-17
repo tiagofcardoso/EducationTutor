@@ -3,6 +3,8 @@ from audio_processing.gravar_audio_com_silencio_e_filtro import gravar_audio_com
 from audio_processing.transcrever_audio import transcrever_audio
 from audio_processing.comparar_pronuncia import comparar_pronuncia
 from text_to_speech_integration.texto_para_audio import texto_para_audio
+from audio_processing.brain_ollama import query_ollama, init_db as init_ollama_db
+from audio_processing.brain_openai import query_openai, init_db as init_openai_db
 
 app = Flask(__name__)
 
@@ -35,5 +37,22 @@ def record():
     })
 
 
+@app.route("/chat/ollama", methods=["POST"])
+def chat_ollama():
+    message = request.json.get("message")
+    response = query_ollama(message)
+    return jsonify({"response": response})
+
+
+@app.route("/chat/openai", methods=["POST"])
+def chat_openai():
+    message = request.json.get("message")
+    response = query_openai(message)
+    return jsonify({"response": response})
+
+
 if __name__ == "__main__":
+    # Initialize both databases
+    init_ollama_db()
+    init_openai_db()
     app.run(debug=True)

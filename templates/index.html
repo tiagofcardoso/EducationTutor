@@ -39,6 +39,17 @@
         </div>
         <!-- Chat -->
         <div class="w-2/3 flex flex-col p-4">
+            <!-- Model Selection -->
+            <div class="flex justify-center space-x-4 mb-4">
+                <button id="ollama-btn" onclick="selectModel('ollama')"
+                    class="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-all">
+                    Ollama
+                </button>
+                <button id="openai-btn" onclick="selectModel('openai')"
+                    class="px-4 py-2 rounded-full bg-purple-500 text-white hover:bg-purple-600 transition-all">
+                    OpenAI
+                </button>
+            </div>
 
             <!-- Caixa de chat -->
             <div id="chat-box" class="flex-grow bg-white p-4 rounded-lg shadow-md overflow-y-auto h-96">

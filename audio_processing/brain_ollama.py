@@ -5,7 +5,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import time
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "chat_history_ollama.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "database/chat_history_ollama.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
