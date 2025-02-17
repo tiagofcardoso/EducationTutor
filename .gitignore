@@ -3,3 +3,5 @@
 node_modules
 audio_processing/__pycache__/
 text_to_speech_integration/__pycache__/
+audio_processing/__pycache__/
+audio_processing/api_keys/.env
