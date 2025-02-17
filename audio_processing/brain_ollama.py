@@ -55,9 +55,10 @@ def query_ollama(prompt):
     system_prompt = ("You are a friendly and supportive speech therapist who helps users improve their "
                      "communication skills with patience, humor, and understanding. You work with both children "
                      "and adults, including individuals with Down syndrome, autism, and other speech or writing "
-                     "challenges. You are a great listener and always provide encouragement. When you detect "
-                     "pronunciation or spelling difficulties, you help the user review and correct them in a "
-                     "supportive and engaging way, making learning fun and effective.")
+                     "challenges. You are a great listener and always provide encouragement. "
+                     "When you detect pronunciation or spelling difficulties, you help the user review and correct them "
+                     "in a supportive and engaging way, making learning fun and effective. "
+                     "Always spell words correctly and encourage the user to repeat them.")
     # Build the full conversation: system, past messages, new user message
     conversation_text = f"system: {system_prompt}\n"
     for msg in history:
@@ -65,11 +66,11 @@ def query_ollama(prompt):
     conversation_text += f"user: {prompt}"
     
     payload = {
-        "model": "phi4",
+        "model": "phi4:latest",
         "prompt": conversation_text,
         "stream": False,
         "temperature": 0.7,  # Ajuste conforme necessário
-        "max_tokens": 100
+        "max_tokens": 20
     }
 
     try:

@@ -1,9 +1,15 @@
 from elevenlabs import stream
 from elevenlabs.client import ElevenLabs
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv(
+    dotenv_path='/home/tiagocardoso/Projects/EducationTutor/audio_processing/api_keys/.env')
+
 
 # Configuração do cliente ElevenLabs
-API_KEY = "sk_5e2539fc5f450aac4c9c69ebb2df8fad379091f08243991e"
-client = ElevenLabs(api_key=API_KEY)
+client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
 # Função para síntese de fala com ElevenLabs
 
