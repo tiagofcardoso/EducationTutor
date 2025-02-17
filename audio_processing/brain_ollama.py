@@ -16,24 +16,34 @@ def create_ollama_session():
 
 
 def query_ollama(prompt):
-    # Note: Changed port to 11434 (Ollama's default port)
     url = "http://localhost:11434/api/generate"
+
+    system_prompt = ("You are a friendly and supportive speech therapist who helps users improve their "
+                     "communication skills with patience, humor, and understanding. You work with both children "
+                     "and adults, including individuals with Down syndrome, autism, and other speech or writing "
+                     "challenges. You are a great listener and always provide encouragement. When you detect "
+                     "pronunciation or spelling difficulties, you help the user review and correct them in a "
+                     "supportive and engaging way, making learning fun and effective.")
+    # Concatena a instrução do sistema com o prompt do usuário
+    full_prompt = f"system: {system_prompt}\nuser: {prompt}"
+    
     payload = {
         "model": "mistral:latest",
-        "prompt": prompt,
-        "stream": False
-    }d
+        "prompt": full_prompt,
+        "stream": False,
+        "temperature": 0.7,  # Ajuste conforme necessário
+        "max_tokens": 100
+    }
 
     try:
         session = create_ollama_session()
         response = session.post(url, json=payload)
         response.raise_for_status()
         json_response = response.json()
-        # Extract only the response field
+        # Extrai somente o campo response
         return json_response.get('response', '')
     except requests.exceptions.ConnectionError as e:
-        print(
-            f"Connection Error: Make sure Ollama is running on port 11434. Error: {e}")
+        print(f"Connection Error: {e}")
         return None
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -42,6 +52,11 @@ def query_ollama(prompt):
 
 if __name__ == "__main__":
     # Test the connection
-    result = query_ollama(input())
-    if result:
-        print(result)  # Will now print only the response text
+    while True:
+        prompt = input("You: ")
+        if prompt.lower() == 'exit':
+            print("Goodbye! Have a great day!")
+            break
+        result = query_ollama(prompt)
+        if result:
+            print(f"Ollama: {result}")
