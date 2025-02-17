@@ -15,40 +15,59 @@ def index():
 
 
 @app.route("/record", methods=["POST"])
-def record():
-    frase_esperada = "Olá! Vamos praticar a sua pronúncia hoje?"
-
-    # Captura do áudio com detecção de silêncio
-    audio_path = gravar_audio_com_silencio_e_filtro()
-
-    # Transcreve o áudio
-    texto_transcrito = transcrever_audio(audio_path)
-
-    # Gera o feedback comparando com a frase esperada
-    feedback = comparar_pronuncia(frase_esperada, texto_transcrito)
-
-    # Gera o áudio de resposta usando ElevenLabs e retorna o caminho do arquivo
-    audio_url = texto_para_audio(feedback)
-
-    return jsonify({
-        "transcription": texto_transcrito,
-        "feedback": feedback,
-        "audio_url": audio_url
-    })
+def record_audio():
+    try:
+        # Record audio
+        audio_file = "audio_gravado.wav"
+        gravar_audio_com_silencio_e_filtro(arquivo=audio_file)
+        
+        # Transcribe audio
+        transcription = transcrever_audio(audio_file)
+        
+        # Get selected model from request
+        model = request.json.get("model", "ollama")
+        
+        # Send transcription to brain
+        if model == "ollama":
+            response = query_ollama(transcription)
+        else:
+            response = query_openai(transcription)
+            
+        # Convert response to speech
+        audio_url = texto_para_audio(response)
+        
+        return jsonify({
+            "transcription": transcription,
+            "response": response,
+            "audio_url": audio_url
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/chat/ollama", methods=["POST"])
 def chat_ollama():
     message = request.json.get("message")
     response = query_ollama(message)
-    return jsonify({"response": response})
+    # Generate audio from response
+    audio_url = texto_para_audio(response)
+    return jsonify({
+        "response": response,
+        "audio_url": audio_url
+    })
 
 
 @app.route("/chat/openai", methods=["POST"])
 def chat_openai():
     message = request.json.get("message")
     response = query_openai(message)
-    return jsonify({"response": response})
+    # Generate audio from response
+    audio_url = texto_para_audio(response)
+    return jsonify({
+        "response": response,
+        "audio_url": audio_url
+    })
 
 
 if __name__ == "__main__":

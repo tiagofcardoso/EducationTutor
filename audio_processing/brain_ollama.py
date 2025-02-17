@@ -65,7 +65,7 @@ def query_ollama(prompt):
     conversation_text += f"user: {prompt}"
     
     payload = {
-        "model": "mistral:latest",
+        "model": "phi4",
         "prompt": conversation_text,
         "stream": False,
         "temperature": 0.7,  # Ajuste conforme necessário

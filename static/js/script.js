@@ -1,6 +1,7 @@
 let avatarIdleAnimation, avatarSpeakingAnimation;
 let isSpeaking = false;  // controle se TTS está em reprodução
 let currentModel = 'ollama'; // default model
+let isRecording = false;
 
 document.addEventListener("DOMContentLoaded", function () {
     // Carrega o avatar em modo idle
@@ -73,6 +74,7 @@ function sendMessage() {
         .then(data => {
             addMessage("Bot: " + data.response, "bot");
             if (data.audio_url) {
+                loadAvatarSpeaking();
                 playAudioFeedback(data.audio_url);
             }
         })
@@ -82,44 +84,52 @@ function sendMessage() {
 
 // Função chamada ao clicar no botão de gravação
 function startRecording() {
-    console.log("startRecording function called");
-    let button = document.getElementById("record-button");
-    button.classList.add("recording");
-
-    // Aqui você faz a lógica de gravação e envia ao servidor
-    // Exemplo fictício com fetch POST
-    fetch("/record", { method: "POST" })
+    const button = document.getElementById('record-button');
+    
+    if (!isRecording) {
+        isRecording = true;
+        button.classList.add('recording');
+        
+        fetch('/record', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: currentModel
+            })
+        })
         .then(response => response.json())
         .then(data => {
-            button.classList.remove("recording");
-            addMessage("Você: [Gravação finalizada]", "user");
-            addMessage("Transcrição: " + data.transcription, "bot");
-            addMessage("Feedback: " + data.feedback, "bot");
-
-            // Toca o áudio do feedback
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+            
+            // Add transcription to chat
+            addMessage("Você: " + data.transcription, "user");
+            
+            // Add response to chat and play audio
+            addMessage("Bot: " + data.response, "bot");
             if (data.audio_url) {
+                loadAvatarSpeaking();
                 playAudioFeedback(data.audio_url);
             }
         })
-        .catch(err => {
-            console.error(err);
-            button.classList.remove("recording");
+        .catch(err => console.error(err))
+        .finally(() => {
+            isRecording = false;
+            button.classList.remove('recording');
         });
+    }
 }
 
 // Toca o áudio e controla a animação do avatar
 function playAudioFeedback(url) {
-    // Muda para animação speaking
-    loadAvatarSpeaking();
-    isSpeaking = true;
-
-    let audio = new Audio(url);
+    const audio = new Audio(url);
     audio.play();
-
     audio.onended = () => {
-        // Volta pra idle quando terminar
         loadAvatarIdle();
-        isSpeaking = false;
     };
 }
 
