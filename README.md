@@ -2,11 +2,14 @@
 
 An AI-powered speech therapy assistant designed to help users improve their communication skills through interactive conversations and pronunciation exercises.
 
+https://github.com/tiagofcardoso/EducationTutor/blob/main/demo.mp4
 
-demo.mp4
+<details>
+<summary>Alternative Video Display (GIF)</summary>
 
+![Demo](demo.gif)
 
-
+</details>
 
 ## Features 🌟
 
