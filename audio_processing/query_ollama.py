@@ -5,7 +5,9 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import time
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "database/chat_history_ollama.db")
+DB_PATH = os.path.join(os.path.dirname(__file__),
+                       "database/chat_history_ollama.db")
+
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -21,12 +23,15 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def add_message(role, content):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("INSERT INTO history_ollama (role, content) VALUES (?, ?)", (role, content))
+    c.execute(
+        "INSERT INTO history_ollama (role, content) VALUES (?, ?)", (role, content))
     conn.commit()
     conn.close()
+
 
 def get_conversation_history():
     conn = sqlite3.connect(DB_PATH)
@@ -35,6 +40,7 @@ def get_conversation_history():
     rows = c.fetchall()
     conn.close()
     return [{"role": row[0], "content": row[1]} for row in rows]
+
 
 def create_ollama_session():
     session = requests.Session()
@@ -64,7 +70,7 @@ def query_ollama(prompt):
     for msg in history:
         conversation_text += f"{msg['role']}: {msg['content']}\n"
     conversation_text += f"user: {prompt}"
-    
+
     payload = {
         "model": "phi4:latest",
         "prompt": conversation_text,

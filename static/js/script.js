@@ -2,6 +2,7 @@ let avatarIdleAnimation, avatarSpeakingAnimation;
 let isSpeaking = false;  // controle se TTS está em reprodução
 let currentModel = 'ollama'; // default model
 let isRecording = false;
+let starCount = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
     // Carrega o avatar em modo idle
@@ -13,12 +14,22 @@ document.addEventListener("DOMContentLoaded", function () {
             sendMessage();
         }
     });
+
+    // Add sound effects for header icons
+    const teddyIcon = document.getElementById('teddy-icon');
+    const bookIcon = document.getElementById('book-icon');
+
+    teddyIcon.addEventListener('click', () => playSound('static/sounds/boing.mp3'));
+    bookIcon.addEventListener('click', () => playSound('static/sounds/ting.mp3'));
 });
 
 function selectModel(model) {
     currentModel = model;
-    document.getElementById('ollama-btn').classList.toggle('bg-blue-700', model === 'ollama');
-    document.getElementById('openai-btn').classList.toggle('bg-purple-700', model === 'openai');
+    const ollamaBtn = document.getElementById('ollama-btn');
+    const openaiBtn = document.getElementById('openai-btn');
+    ollamaBtn.classList.toggle('active', model === 'ollama');
+    openaiBtn.classList.toggle('active', model === 'openai');
+    playSound('static/sounds/click.mp3'); // Sound on model selection
 }
 
 // Carrega a animação idle
@@ -62,6 +73,12 @@ function sendMessage() {
     if (message) {
         addMessage("Você: " + message, "user");
         input.value = "";
+        playSound('static/sounds/ding.mp3'); // Play sound on send
+
+        let chatBox = document.getElementById("chat-box");
+        let loadingDiv = document.createElement("div");
+        loadingDiv.classList.add("loading");
+        chatBox.appendChild(loadingDiv);
 
         fetch(`/chat/${currentModel}`, {
             method: "POST",
@@ -72,6 +89,7 @@ function sendMessage() {
         })
         .then(response => response.json())
         .then(data => {
+            chatBox.removeChild(loadingDiv);
             addMessage("Bot: " + data.response, "bot");
             if (data.audio_url) {
                 loadAvatarSpeaking();
@@ -89,6 +107,7 @@ function startRecording() {
     if (!isRecording) {
         isRecording = true;
         button.classList.add('recording');
+        playSound('static/sounds/stop-recording.mp3'); // Play sound on recording start
         
         fetch('/record', {
             method: 'POST',
@@ -120,6 +139,7 @@ function startRecording() {
         .finally(() => {
             isRecording = false;
             button.classList.remove('recording');
+            playSound('static/sounds/stop-recording.mp3'); // Play sound on recording stop
         });
     }
 }
@@ -127,9 +147,14 @@ function startRecording() {
 // Toca o áudio e controla a animação do avatar
 function playAudioFeedback(url) {
     const audio = new Audio(url);
+    const speechBubble = document.getElementById('speech-bubble');
     audio.play();
+    speechBubble.textContent = "I'm listening..."; // Or dynamic text from the bot
+    speechBubble.classList.remove('hidden');
+    setTimeout(() => speechBubble.classList.add('hidden'), 3000); // Hide after 3 seconds
     audio.onended = () => {
         loadAvatarIdle();
+        playSound('static/sounds/stop-recording.mp3'); // Add a fun sound
     };
 }
 
@@ -139,6 +164,38 @@ function addMessage(text, sender) {
     let msgDiv = document.createElement("div");
     msgDiv.classList.add("message", sender);
     msgDiv.innerText = text;
+
+    // Add rewards and confetti for user messages
+    if (sender === "user") {
+        starCount++;
+        const rewardCounter = document.getElementById("reward-counter");
+        rewardCounter.textContent = `You’ve earned ${starCount} stars today! ⭐`;
+        rewardCounter.classList.add('animate-bounce');
+        setTimeout(() => rewardCounter.classList.remove('animate-bounce'), 1000);
+
+        // Confetti effect
+        for (let i = 0; i < 20; i++) {
+            const confetti = document.createElement("div");
+            confetti.classList.add("confetti");
+            confetti.style.position = "absolute";
+            confetti.style.width = "10px";
+            confetti.style.height = "10px";
+            confetti.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            confetti.style.borderRadius = "50%";
+            confetti.style.top = `${Math.random() * 100}%`;
+            confetti.style.left = `${Math.random() * 100}%`;
+            confetti.style.animation = `fall ${Math.random() * 2 + 1}s linear`;
+            chatBox.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+    }
+
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Play sound function
+function playSound(url) {
+    const audio = new Audio(url);
+    audio.play().catch(err => console.error("Error playing sound:", err));
 }

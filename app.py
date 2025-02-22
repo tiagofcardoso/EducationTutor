@@ -3,8 +3,8 @@ from audio_processing.gravar_audio_com_silencio_e_filtro import gravar_audio_com
 from audio_processing.transcrever_audio import transcrever_audio
 from audio_processing.comparar_pronuncia import comparar_pronuncia
 from text_to_speech_integration.texto_para_audio import texto_para_audio
-from audio_processing.brain_ollama import query_ollama, init_db as init_ollama_db
-from audio_processing.brain_openai import query_openai, init_db as init_openai_db
+from audio_processing.query_ollama import query_ollama, init_db as init_ollama_db
+from audio_processing.query_openai import query_openai, init_db as init_openai_db
 
 app = Flask(__name__)
 
