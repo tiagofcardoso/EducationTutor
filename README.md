@@ -4,12 +4,10 @@ An AI-powered speech therapy assistant designed to help users improve their comm
 
 https://github.com/tiagofcardoso/EducationTutor/blob/main/demo.mp4
 
-<details>
-<summary>Alternative Video Display (GIF)</summary>
+
 
 ![Demo](demo.gif)
 
-</details>
 
 ## Features 🌟
 
