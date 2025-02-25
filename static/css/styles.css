@@ -76,7 +76,8 @@ body {
 }
 
 .message.bot {
-    background: #fef3c7; /* Bright yellow */
+    background: #fef3c7;
+    /* Bright yellow */
     border-radius: 1rem 1rem 1rem 0.25rem;
     margin-right: auto;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -103,7 +104,8 @@ body {
 }
 
 .message.user {
-    background: #d1fae5; /* Bright green */
+    background: #d1fae5;
+    /* Bright green */
     border-radius: 1rem 1rem 0.25rem 1rem;
     margin-left: auto;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -116,6 +118,24 @@ body {
     right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
+}
+
+.message.system {
+    background-color: #f0f9ff;
+    color: #1e40af;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin: 4px 0;
+    font-style: italic;
+}
+
+.message.error {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin: 4px 0;
+    font-weight: 500;
 }
 
 /* Input Area */
@@ -196,15 +216,24 @@ nav {
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
-#teddy-icon, #book-icon {
+#teddy-icon,
+#book-icon {
     transition: transform 0.3s ease;
 }
 
-#teddy-icon:hover, #book-icon:hover {
+#teddy-icon:hover,
+#book-icon:hover {
     transform: scale(1.2) rotate(10deg);
 }
 
@@ -231,8 +260,15 @@ nav {
 }
 
 @keyframes popUp {
-    0% { opacity: 0; transform: scale(0.8) translateY(20px); }
-    100% { opacity: 1; transform: scale(1) translateY(0); }
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 /* Loading State */
@@ -247,8 +283,13 @@ nav {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Animations */
@@ -257,6 +298,7 @@ nav {
         opacity: 0;
         transform: translateY(10px);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -268,10 +310,12 @@ nav {
         transform: scale(1);
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
     }
+
     50% {
         transform: scale(1.05);
         box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
     }
+
     100% {
         transform: scale(1);
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
@@ -292,11 +336,25 @@ nav {
 }
 
 @keyframes type {
-    0% { border-color: transparent; }
-    25% { border-color: #60a5fa; }
-    50% { border-color: transparent; }
-    75% { border-color: #60a5fa; }
-    100% { border-color: transparent; }
+    0% {
+        border-color: transparent;
+    }
+
+    25% {
+        border-color: #60a5fa;
+    }
+
+    50% {
+        border-color: transparent;
+    }
+
+    75% {
+        border-color: #60a5fa;
+    }
+
+    100% {
+        border-color: transparent;
+    }
 }
 
 /* Confetti */
@@ -308,8 +366,15 @@ nav {
 }
 
 @keyframes fall {
-    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
 }
 
 /* Reward Counter */
@@ -323,9 +388,17 @@ nav {
 
 /* Twinkle Animation for Stars */
 @keyframes twinkle {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 /* Responsive Design */
@@ -334,21 +407,26 @@ nav {
         flex-direction: column;
         padding: 1rem;
     }
+
     #chat-box {
         max-height: 50vh;
     }
+
     #avatar-container {
         max-width: 200px;
         max-height: 200px;
         margin: 0 auto;
     }
+
     .action-button {
         width: 40px;
         height: 40px;
     }
+
     nav .text-4xl {
         font-size: 2.5rem;
     }
+
     #chat-input {
         padding: 12px 18px;
         font-size: 1rem;
