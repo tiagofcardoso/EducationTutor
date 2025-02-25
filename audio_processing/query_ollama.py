@@ -72,10 +72,10 @@ def query_ollama(prompt):
     conversation_text += f"user: {prompt}"
 
     payload = {
-        "model": "phi4:latest",
+        "model": "llama3:latest",
         "prompt": conversation_text,
         "stream": False,
-        "temperature": 0.7,  # Ajuste conforme necessário
+        "temperature": 0.5,  # Ajuste conforme necessário
         "max_tokens": 20
     }
 

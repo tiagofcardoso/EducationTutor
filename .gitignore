@@ -5,3 +5,8 @@ audio_processing/__pycache__/
 text_to_speech_integration/__pycache__/
 audio_processing/__pycache__/
 audio_processing/api_keys/.env
+aws/
+polly.py
+audio_processing/database/
+static/audio/response.mp3
+audio_processing/database/*.db
