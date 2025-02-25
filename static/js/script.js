@@ -246,7 +246,7 @@ async function sendAudioToServer(audioBlob) {
         const data = await response.json();
         if (data.text) {
             // Set the transcribed text to the input
-            document.getElementById('chat-input').value = data.text;
+            //document.getElementById('chat-input').value = data.text;
 
             // Automatically send the transcribed message
             addMessage("Transcribed text: " + data.text, "system");

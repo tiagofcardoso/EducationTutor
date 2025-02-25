@@ -60,35 +60,61 @@ def get_conversation_history():
         return []
 
 
+def clean_response_for_tts(text):
+    """Simplified cleaning that focuses on natural speech flow"""
+    import re
+
+    # Basic cleanups
+    text = re.sub(r'###|\*|\-|•', '', text)  # Remove markdown characters
+    text = re.sub(r'\([^)]*\)', '', text)    # Remove parentheses and content
+    text = re.sub(r'\n+', '. ', text)        # Convert newlines to periods
+    text = re.sub(r'\s+', ' ', text)         # Normalize spaces
+
+    # Make sure there's proper spacing around punctuation
+    text = re.sub(r'([.,!?;:])\s*', r'\1 ', text)
+
+    # Remove any remaining special characters
+    text = re.sub(r'[^\w\s.,!?;:]', ' ', text)
+
+    return text.strip()
+
+
 def query_openai(prompt):
     history = get_conversation_history()
 
     system_prompt = {
         "role": "system",
         "content": (
-            "You are a friendly and supportive speech therapist who helps users improve their "
-            "communication skills with patience, humor, and understanding. You work with both children "
-            "and adults, including individuals with Down syndrome, autism, and other speech or writing "
-            "challenges. You are a great listener and always provide encouragement. "
-            "When you detect pronunciation or spelling difficulties, you help the user review and correct them "
-            "in a supportive and engaging way, making learning fun and effective. "
-            "Try to be quick in your answers."
+            "You are a friendly speech therapist. When responding: "
+            "1. Use simple, conversational language. "
+            "2. Speak in short, clear sentences. "
+            "3. Avoid using special characters or formatting. "
+            "4. Present information in a natural, flowing way. "
+            "5. Give examples as part of the conversation. "
+            "For example, instead of writing '- Sound of X:', say 'The sound of X is like in...'"
         )
     }
 
     messages = [system_prompt] + history + \
         [{"role": "user", "content": prompt}]
+
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            max_tokens=100,  # Ajustar para respostas mais curtas e rápidas
+            max_tokens=200,
             temperature=0.7
         )
+
         answer = response.choices[0].message.content
+        clean_answer = clean_response_for_tts(answer)
+
+        # Store original response in history
         add_message("user", prompt)
         add_message("assistant", answer)
-        return answer
+
+        return clean_answer
+
     except Exception as e:
         print(f"Erro na API OpenAI: {e}")
         return None
