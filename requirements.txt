@@ -1,0 +1,10 @@
+pip install flask
+pip install pyaudio
+pip install numpy
+pip install noisereduce
+pip install whisper
+pip install boto3
+pip install dotenv
+pip install requests
+pip install openai
+pip install ollama

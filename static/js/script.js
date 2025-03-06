@@ -5,6 +5,7 @@ let isRecording = false;
 let starCount = 0;
 let mediaRecorder;
 let audioChunks = [];
+let currentAudio = null; // Track the currently playing audio
 
 document.addEventListener("DOMContentLoaded", function () {
     // Carrega o avatar em modo idle
@@ -49,6 +50,8 @@ function loadAvatarIdle() {
         autoplay: true,
         path: "static/animations/talking_et_urso.json" // Ajuste para o seu arquivo de avatar idle
     });
+
+    isSpeaking = false;
 }
 
 // Carrega a animação speaking
@@ -66,10 +69,23 @@ function loadAvatarSpeaking() {
         autoplay: true,
         path: "static/animations/talking_et_urso.json" // Ajuste para o seu arquivo "falando"
     });
+
+    isSpeaking = true;
 }
 
 // Função chamada ao clicar no botão de enviar mensagem
 function sendMessage() {
+    // If audio is currently playing, stop it
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+        // Return to idle animation if we were speaking
+        if (isSpeaking) {
+            loadAvatarIdle();
+        }
+    }
+
     let input = document.getElementById("chat-input");
     let message = input.value.trim();
     if (message) {
@@ -87,7 +103,10 @@ function sendMessage() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ message: message })
+            body: JSON.stringify({
+                message: message,
+                voice: "Camila" // Specify which Polly voice to use (can be made configurable)
+            })
         })
             .then(response => response.json())
             .then(data => {
@@ -98,7 +117,11 @@ function sendMessage() {
                     playAudioFeedback(data.audio_url);
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                chatBox.removeChild(loadingDiv);
+                addMessage("Error: Could not connect to the server. Please try again later.", "error");
+            });
     }
 }
 
@@ -132,6 +155,17 @@ function checkAudioSupport() {
 }
 
 async function startRecording() {
+    // If audio is currently playing, stop it first
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+        // Return to idle animation if we were speaking
+        if (isSpeaking) {
+            loadAvatarIdle();
+        }
+    }
+
     try {
         checkAudioSupport();
         const mimeType = getSupportedMimeType();
@@ -192,10 +226,12 @@ async function startRecording() {
         let errorMessage = 'Error accessing microphone. ';
 
         if (error.name === 'NotAllowedError') {
-            // ...existing error handling code...
+            errorMessage += 'Please allow microphone access to use this feature.';
         } else {
-            addMessage(error.message, "error");
+            errorMessage = error.message;
         }
+
+        addMessage(errorMessage, "error");
     }
 }
 
@@ -245,9 +281,6 @@ async function sendAudioToServer(audioBlob) {
 
         const data = await response.json();
         if (data.text) {
-            // Set the transcribed text to the input
-            //document.getElementById('chat-input').value = data.text;
-
             // Automatically send the transcribed message
             addMessage("Transcribed text: " + data.text, "system");
 
@@ -262,8 +295,15 @@ async function sendAudioToServer(audioBlob) {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ message: data.text })
+                body: JSON.stringify({
+                    message: data.text,
+                    voice: "Camila" // Specify Polly voice to use
+                })
             });
+
+            if (!chatResponse.ok) {
+                throw new Error(`Chat API error: ${chatResponse.status}`);
+            }
 
             const chatData = await chatResponse.json();
             chatBox.removeChild(loadingDiv);
@@ -286,15 +326,63 @@ async function sendAudioToServer(audioBlob) {
 
 // Toca o áudio e controla a animação do avatar
 function playAudioFeedback(url) {
-    const audio = new Audio(url);
+    // First stop any currently playing audio
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+
+    // Create new audio instance
+    currentAudio = new Audio(url);
+
+    // Switch to speaking animation
+    loadAvatarSpeaking();
+
+    // Show speech bubble with visual indicator
     const speechBubble = document.getElementById('speech-bubble');
-    audio.play();
-    speechBubble.textContent = "I'm listening..."; // Or dynamic text from the bot
-    speechBubble.classList.remove('hidden');
-    setTimeout(() => speechBubble.classList.add('hidden'), 3000); // Hide after 3 seconds
-    audio.onended = () => {
+    if (speechBubble) {
+        speechBubble.textContent = "Speaking...";
+        speechBubble.classList.remove('hidden');
+    }
+
+    // Create audio analyzer for visualizations (optional)
+    try {
+        // Add visualization if you want to show audio waveform
+        // This is optional and can be expanded later
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaElementSource(currentAudio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+    } catch (e) {
+        console.log("Audio visualization not supported in this browser");
+    }
+
+    // Play the audio
+    currentAudio.play().catch(err => {
+        console.error("Error playing audio:", err);
+        // If playback fails, switch back to idle animation
         loadAvatarIdle();
-        playSound('static/sounds/stop-recording.mp3'); // Add a fun sound
+    });
+
+    // When audio ends, switch back to idle animation
+    currentAudio.onended = () => {
+        loadAvatarIdle();
+        if (speechBubble) {
+            speechBubble.classList.add('hidden');
+        }
+        playSound('static/sounds/stop-recording.mp3'); // Add a fun sound when done
+        currentAudio = null;
+    };
+
+    // Add event listener for errors
+    currentAudio.onerror = () => {
+        console.error("Audio playback error:", currentAudio.error);
+        loadAvatarIdle();
+        if (speechBubble) {
+            speechBubble.classList.add('hidden');
+        }
+        currentAudio = null;
     };
 }
 
@@ -309,9 +397,11 @@ function addMessage(text, sender) {
     if (sender === "user") {
         starCount++;
         const rewardCounter = document.getElementById("reward-counter");
-        rewardCounter.textContent = `You’ve earned ${starCount} stars today! ⭐`;
-        rewardCounter.classList.add('animate-bounce');
-        setTimeout(() => rewardCounter.classList.remove('animate-bounce'), 1000);
+        if (rewardCounter) {
+            rewardCounter.textContent = `You've earned ${starCount} stars today! ⭐`;
+            rewardCounter.classList.add('animate-bounce');
+            setTimeout(() => rewardCounter.classList.remove('animate-bounce'), 1000);
+        }
 
         // Confetti effect
         for (let i = 0; i < 20; i++) {
@@ -337,5 +427,6 @@ function addMessage(text, sender) {
 // Play sound function
 function playSound(url) {
     const audio = new Audio(url);
+    audio.volume = 0.5; // Set volume to 50%
     audio.play().catch(err => console.error("Error playing sound:", err));
 }
